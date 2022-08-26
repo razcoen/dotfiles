@@ -1,0 +1,46 @@
+#!/usr/bin/env zsh
+
+MACOS_DETAILS=$(sw_vers 2> /dev/null)
+if [[ -z $MACOS_DETAILS ]] ; then
+  echo "Dotfiles is supported only on MacOS."
+  exit 1
+fi
+
+cd $(dirname $(realpath $0))
+GIT_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_PATH=$GIT_ROOT/dotfiles
+
+function sha1sum_dir() {
+  local dir=$1
+  cd $dir
+  echo $(find . -type f -exec sha1sum '{}' \; | sha1sum | awk '{ printf $1 }')
+}
+
+function build_if_changed() {
+  local calculated_checksum=$(sha1sum_dir $GIT_ROOT/lib/install)
+  local checksum=$(cat $GIT_ROOT/.checksum 2> /dev/null)
+  if [[ $calculated_checksum != $checksum ]]; then
+    echo "> Change detected, building 'dotfiles'..."
+    ./lib/install/build.sh
+    if [[ -z $? ]]; then
+      return
+    fi
+    local calculated_checksum=$(sha1sum_dir $GIT_ROOT/lib/install)
+    echo $calculated_checksum > $GIT_ROOT/.checksum
+  fi
+}
+
+
+function run_bin() {
+  local script_path=$1
+  shift
+  if [[ $(arch) == arm64 ]]; then
+    $GIT_ROOT/lib/install/bin/install-arm64 --path=$script_path $@
+  else
+    $GIT_ROOT/lib/install/bin/install-amd64 --path=$script_path $@
+  fi
+}
+
+build_if_changed
+run_bin $SCRIPT_PATH $@
+
