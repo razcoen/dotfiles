@@ -55,24 +55,12 @@ return packer.startup(function(use)
   use { "lukas-reineke/indent-blankline.nvim", config = "require('plugins.indentline')" }
 
   use { "akinsho/toggleterm.nvim", config = "require('plugins.toggleterm')" }
-  -- use "voldikss/vim-floaterm"
 
   use { 'stevearc/dressing.nvim', requires = 'MunifTanjim/nui.nvim', config = "require('plugins.dressing')" }
-
-  -- status line
-  use {
-    'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-    config = "require('plugins.lualine')"
-  }
-
   use { 'romgrk/barbar.nvim', config = "require('plugins.barbar')" }
-  use "moll/vim-bbye"
   use "ahmedkhalf/project.nvim"
   use { "lewis6991/impatient.nvim", config = "require('plugins.impatient')" }
-  use "goolord/alpha-nvim"
   use "antoinemadec/FixCursorHold.nvim" -- This is needed to fix lsp doc highlight
-  use "folke/which-key.nvim"
   use {
     'iamcco/markdown-preview.nvim',
     run = 'cd app && yarn install',
@@ -92,6 +80,7 @@ return packer.startup(function(use)
   use { "catppuccin/nvim", as = "catppuccin" }
   use "projekt0n/github-nvim-theme"
   use "ayu-theme/ayu-vim"
+  use "Shatur/neovim-ayu"
   use "shaunsingh/nord.nvim"
   use "lourenci/github-colors"
 
@@ -121,10 +110,12 @@ return packer.startup(function(use)
     requires = 'antoinemadec/FixCursorHold.nvim',
   }
   use "simrat39/symbols-outline.nvim" -- symbols panel
-  use {
-    "j-hui/fidget.nvim",
-    config = "require('fidget').setup({})"
-  }
+
+  -- BUG: fidget has some issues with transparency
+  -- use {
+  --   "j-hui/fidget.nvim",
+  --   config = "require('fidget').setup({})"
+  -- }
 
   -- Trouble
   use { "folke/trouble.nvim", config = "require('plugins.trouble')" }
@@ -147,7 +138,6 @@ return packer.startup(function(use)
     run = ":TSUpdate",
     config = "require('plugins.treesitter')",
   }
-  use 'nvim-treesitter/nvim-treesitter-textobjects'
   use "JoosepAlviste/nvim-ts-context-commentstring"
 
   -- Git
@@ -156,9 +146,6 @@ return packer.startup(function(use)
 
   -- Rust
   use { "simrat39/rust-tools.nvim", config = "require('rust-tools').setup({})" }
-
-  -- scrollbar
-  use { "petertriho/nvim-scrollbar", config = "require('scrollbar').setup()" }
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins

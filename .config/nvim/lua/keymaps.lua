@@ -12,14 +12,14 @@ keymap("n", "<C-d>", ":bp|bd #<CR>", opts)
 
 -- Telescope
 keymap("n", "<C-p>", "<CMD>lua require('plugins.telescope').project_files()<CR>", { noremap = true })
-keymap("n", "<S-p>", "<CMD>Telescope live_grep<CR>", { noremap = true })
+keymap("n", "<S-p>", "<CMD>Telescope live_grep hidden=true<CR>", { noremap = true })
 keymap("n", "<leader>ff", "<CMD>lua require('plugins.telescope').all_files()<CR>", { noremap = true })
 keymap("n", "<leader>fb",
   "<cmd>lua require'telescope.builtin'.buffers(require('telescope.themes').get_dropdown({ previewer = false }))<cr>",
   opts)
 
 -- Tree
-keymap("n", "<C-f>", ":NvimTreeToggle<CR> NvimTreeRefresh<CR>", opts)
+keymap("n", "<C-f>", ":NvimTreeToggle<CR>", opts)
 
 -- Trouble
 keymap("n", "<C-t>", ":TroubleToggle<cr>", opts)
@@ -85,8 +85,8 @@ keymap("v", "X", '"_X', { noremap = true, silent = true })
 keymap("v", "p", '"_dP', { noremap = true, silent = true })
 
 -- Save file by CTRL-S
-keymap("n", "<C-s>", ":w<CR>", { noremap = true, silent = true })
-keymap("i", "<C-s>", "<ESC> :w<CR>", { noremap = true, silent = true })
+keymap("n", "<C-s>", ":w!<CR>", { noremap = true, silent = true })
+keymap("i", "<C-s>", "<ESC> :w!<CR>", { noremap = true, silent = true })
 
 -- Make word uppercase
 keymap("n", "<C-u>", "viwU<ESC>", { noremap = true })
@@ -97,6 +97,6 @@ keymap("n", "<CR>", ":noh<CR><CR>", { noremap = true, silent = true })
 
 
 -- Terminal
-keymap("n", [[<c-\>]], ":vs term://zsh<CR>", { silent = true })
-keymap("i", [[<c-\>]], ":vs term://zsh<CR>", { silent = true })
-keymap("v", [[<c-\>]], ":vs term://zsh<CR>", { silent = true })
+keymap("n", [[<c-\>]], ":term<CR>", { silent = true })
+keymap("i", [[<c-\>]], ":term<CR>", { silent = true })
+keymap("v", [[<c-\>]], ":term<CR>", { silent = true })

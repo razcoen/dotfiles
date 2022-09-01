@@ -8,8 +8,13 @@ require("github-theme").setup({
 
 
 vim.g.catppuccin_flavour = "frappe"
-local colorscheme = "github_dark_default"
+local colorscheme = "ayu-mirage"
 vim.cmd(string.format("colorscheme %s", colorscheme))
+
+require("transparent")
+
+vim.highlight.create('Search', { guifg = "Yellow", gui = "bold" }, false);
+-- vim.highlight.create('TelescopeSelection', { guibg = "#374247", gui = "bold" }, false);
 
 -- Errors
 vim.highlight.create('LspDiagnosticsVirtualTextError', { guifg = "Red", gui = "bold" }, false);
