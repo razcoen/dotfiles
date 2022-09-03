@@ -5,66 +5,17 @@ FG_GREEN="\033[0;32m"
 FG_BLUE="\033[0;34m"
 FG_WHITE="\033[0;37m"
 FG_COMMENT="\033[0;38;5;242m"
-FRAMES='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-
-rm /tmp/dotfiles.log
 
 ################################################################
 # Runner
 ################################################################
 
-step=1
-steps=0
-
-function spinner() {
+function x() { 
   local command=$(echo "$@")
-  "$@" &>> /tmp/dotfiles.log &
-  local pid=$! 
-  local i=0
-  while ps -p $pid > /dev/null
-  do
-    i=$(( i % $((${#FRAMES})) + 1 ))
-    lim=$(tput cols)
-    frame="${${(@z)FRAMES}[$i]//\"}"
-    printf '\r%*.*b' ${#command} $lim "${FG_BLUE}$frame ${FG_COMMENT}($step/$steps) $command$(printf '%0.1s' " "{1..$lim})"
-    sleep .05
-  done
-  printf "\r"
-  wait $pid
-  exit $?
-}
-
-declare -a cmds=()
-
-function x() {
-  cmds+=($@ ";")
-  steps=$((steps+1))
-}
-
-function z() {
-  cmd=()
-  for arg in ${cmds[@]}; do
-    if [[ $arg = ";" ]]; then
-      y ${cmd[@]}
-      cmd=()
-    else
-      cmd+=($arg)
-    fi
-  done
-}
-
-function y() { 
-  local command=$(echo "$@")
-  echo "${FG_BLUE}[X] ${FG_WHITE}$command" >> /tmp/dotfiles.log
-  spinner "$@" &
-  wait $!
+  echo "${FG_BLUE}[X] ${FG_WHITE}$command"
+  "$@"
   exit_code=$?
-  echo -en "\033[1K"
-  step=$((step+1))
-  if [[ $exit_code -eq 0 ]]; then
-    echo "${FG_GREEN}[OK] ${FG_WHITE}$command" >> /tmp/dotfiles.log
-  else
-    echo "${FG_RED}[FAIL] ${FG_WHITE}$command" >> /tmp/dotfiles.log
+  if [[ $exit_code -ne 0 ]]; then
     exit 1
   fi
 }
@@ -144,7 +95,9 @@ function symlink() {
   local source=$1
   local target=$2
   if [[ $(readlink -f $target) != $source ]]; then
-    vared -p "Overwrite $target? [Y/n] " -c input
+    if [[ -f $target ]]; then
+      vared -p "Overwrite $target? [Y/n] " -c input
+    fi
     if [[ ${input:-y}  =~ ^(y|Y)$ ]]; then
       x rm -rf $target
       x ln -s $source $target
@@ -158,5 +111,3 @@ x symlink $DOTFILES/.oh-my-zsh/custom $HOME/.oh-my-zsh/custom
 x symlink $DOTFILES/.zshrc $HOME/.zshrc
 
 x nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync'
-
-z
