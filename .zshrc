@@ -43,3 +43,15 @@ source ~/.cargo/env
 # neovim #
 ##########
 export VISUAL="nvim" 
+
+###########
+# kubectl #
+###########
+source <(kubectl completion zsh)
+
+###########
+# aliases #
+###########
+alias vi=nvim
+alias vim=nvim
+

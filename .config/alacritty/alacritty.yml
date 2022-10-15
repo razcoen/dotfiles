@@ -3,7 +3,7 @@ env:
 
 window:
 
-  opacity: 0.95
+  opacity: 1.00
 
   dimensions:
     columns: 0
@@ -11,10 +11,10 @@ window:
 
   padding:
     x: 20
-    y: 20
+    y: 30
 
   dynamic_padding: true
-  decorations: None
+  decorations: transparent
   startup_mode: Windowed
   dynamic_title: true
 
@@ -89,3 +89,8 @@ debug:
   persistent_logging: false
   log_level: Warn
   print_events: false
+
+colors:
+  # Default colors
+  primary:
+    background: '0x000000'

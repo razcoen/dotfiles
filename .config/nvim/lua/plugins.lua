@@ -54,35 +54,37 @@ return packer.startup(function(use)
 
   use { "lukas-reineke/indent-blankline.nvim", config = "require('plugins.indentline')" }
 
-  use { "akinsho/toggleterm.nvim", config = "require('plugins.toggleterm')" }
+  -- use { "akinsho/toggleterm.nvim", config = "require('plugins.toggleterm')" }
 
   use { 'stevearc/dressing.nvim', requires = 'MunifTanjim/nui.nvim', config = "require('plugins.dressing')" }
   use { 'romgrk/barbar.nvim', config = "require('plugins.barbar')" }
   use "ahmedkhalf/project.nvim"
   use { "lewis6991/impatient.nvim", config = "require('plugins.impatient')" }
   use "antoinemadec/FixCursorHold.nvim" -- This is needed to fix lsp doc highlight
-  use {
-    'iamcco/markdown-preview.nvim',
-    run = 'cd app && yarn install',
-    ft = { 'markdown' }
-  }
+  -- use {
+  --   'iamcco/markdown-preview.nvim',
+  --   run = 'cd app && yarn install',
+  --   ft = { 'markdown' }
+  -- }
   use "RRethy/vim-illuminate" -- highlight current word
 
   -- Colorschemes
   use "morhetz/gruvbox"
-  use "ghifarit53/tokyonight-vim"
-  use "joshdick/onedark.vim"
-  use "sainnhe/everforest"
-  use "dracula/vim"
-  use "tomasiser/vim-code-dark"
-  use "rebelot/kanagawa.nvim"
-  use 'EdenEast/nightfox.nvim'
-  use { "catppuccin/nvim", as = "catppuccin" }
+  -- use "ghifarit53/tokyonight-vim"
+  -- use "joshdick/onedark.vim"
+  -- use "sainnhe/everforest"
+  -- use "dracula/vim"
+  -- use "tomasiser/vim-code-dark"
+  -- use "rebelot/kanagawa.nvim"
+  -- use 'EdenEast/nightfox.nvim'
+  -- use { "catppuccin/nvim", as = "catppuccin" }
   use "projekt0n/github-nvim-theme"
-  use "ayu-theme/ayu-vim"
-  use "Shatur/neovim-ayu"
-  use "shaunsingh/nord.nvim"
-  use "lourenci/github-colors"
+  -- use "ayu-theme/ayu-vim"
+  -- use "Shatur/neovim-ayu"
+  -- use "shaunsingh/nord.nvim"
+  -- use "lourenci/github-colors"
+  -- use "krfl/fleetish-vim"
+  -- use "bluz71/vim-moonfly-colors"
 
   -- cmp plugins
   use { "hrsh7th/nvim-cmp", config = "require('plugins.cmp')" } -- The completion plugin
@@ -104,18 +106,18 @@ return packer.startup(function(use)
     config = "require('lsp_signature').setup({})"
   }
   use "nvim-lua/lsp_extensions.nvim"
-  use { -- lightbulb
-    'kosayoda/nvim-lightbulb',
-    config = "require('nvim-lightbulb').setup({autocmd = {enabled = true}})",
-    requires = 'antoinemadec/FixCursorHold.nvim',
-  }
+  -- use { -- lightbulb
+  --   'kosayoda/nvim-lightbulb',
+  --   config = "require('nvim-lightbulb').setup({autocmd = {enabled = true}})",
+  --   requires = 'antoinemadec/FixCursorHold.nvim',
+  -- }
   use "simrat39/symbols-outline.nvim" -- symbols panel
 
   -- BUG: fidget has some issues with transparency
-  -- use {
-  --   "j-hui/fidget.nvim",
-  --   config = "require('fidget').setup({})"
-  -- }
+  use {
+    "j-hui/fidget.nvim",
+    config = "require('fidget').setup({})"
+  }
 
   -- Trouble
   use { "folke/trouble.nvim", config = "require('plugins.trouble')" }
@@ -139,6 +141,7 @@ return packer.startup(function(use)
     config = "require('plugins.treesitter')",
   }
   use "JoosepAlviste/nvim-ts-context-commentstring"
+  use 'nvim-treesitter/nvim-treesitter-context'
 
   -- Git
   use { "lewis6991/gitsigns.nvim", config = "require('plugins.gitsigns')" }

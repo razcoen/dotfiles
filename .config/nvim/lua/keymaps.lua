@@ -9,6 +9,11 @@ keymap("n", "<C-j>", "<C-w>j", opts)
 keymap("n", "<C-k>", "<C-w>k", opts)
 keymap("n", "<C-l>", "<C-w>l", opts)
 keymap("n", "<C-d>", ":bp|bd #<CR>", opts)
+keymap("t", "<C-h>", "<C-\\><C-n><C-w>h", opts)
+keymap("t", "<C-j>", "<C-\\><C-n><C-w>j", opts)
+keymap("t", "<C-k>", "<C-\\><C-n><C-w>k", opts)
+keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", opts)
+keymap("t", "<C-d>", ":bp|bd #<CR>", opts)
 
 -- Telescope
 keymap("n", "<C-p>", "<CMD>lua require('plugins.telescope').project_files()<CR>", { noremap = true })
@@ -26,7 +31,7 @@ keymap("n", "<C-t>", ":TroubleToggle<cr>", opts)
 
 -- -- Floaterm
 -- keymap("n", "<C-\\>", ":FloatermToggle<cr>", opts)
--- keymap("t", "<Esc>", "<C-\\><C-n>", opts)
+keymap("t", "<Esc>", "<C-\\><C-n>", opts)
 -- keymap("t","<C-\\>","<C-\\><C-n>:FloatermToggle<CR>", opts)
 -- keymap("t","<C-n>","<C-\\><C-n>:FloatermNew<CR>", opts)
 -- keymap("t","<C-q>","<C-\\><C-n>:FloatermKill<CR>", opts)

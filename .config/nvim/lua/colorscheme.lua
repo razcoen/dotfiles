@@ -1,32 +1,32 @@
-local catppuccin = require('catppuccin')
-catppuccin.setup()
+-- local catppuccin = require('catppuccin')
+-- catppuccin.setup()
 
-require("github-theme").setup({
-  comment_style = "NONE",
-  keyword_style = "NONE",
-})
+-- require("github-theme").setup({
+--   comment_style = "NONE",
+--   keyword_style = "NONE",
+-- })
+--
 
-
-vim.g.catppuccin_flavour = "frappe"
-local colorscheme = "ayu-mirage"
+-- vim.g.catppuccin_flavour = "frappe"
+local colorscheme = "github_dark_default"
 vim.cmd(string.format("colorscheme %s", colorscheme))
 
 require("transparent")
 
-vim.highlight.create('Search', { guifg = "Yellow", gui = "bold" }, false);
--- vim.highlight.create('TelescopeSelection', { guibg = "#374247", gui = "bold" }, false);
+vim.api.nvim_exec("highlight! Search guifg=Yellow gui=bold", false)
+-- vim.api.nvim_set_hl('TelescopeSelection', { guibg = "#374247", gui = "bold" }, false);
 
 -- Errors
-vim.highlight.create('LspDiagnosticsVirtualTextError', { guifg = "Red", gui = "bold" }, false);
-vim.highlight.create('DiagnosticVirtualTextError', { guifg = "Red", gui = "bold" }, false);
+vim.api.nvim_exec("highlight! LspDiagnosticsVirtualTextError guifg=Red gui=bold", false)
+vim.api.nvim_exec("highlight! DiagnosticVirtualTextError guifg=Red gui=bold", false)
 
 -- Warnings
-vim.highlight.create('LspDiagnosticsVirtualTextWarning', { guifg = "Yellow" }, false);
-vim.highlight.create('DiagnosticVirtualTextWarn', { guifg = "Yellow" }, false);
+vim.api.nvim_exec("highlight! LspDiagnosticsVirtualTextWarning guifg=Yellow", false)
+vim.api.nvim_exec("highlight! DiagnosticVirtualTextWarn guifg=Yellow", false)
 
 -- Info & Hints
-vim.highlight.create('DiagnosticVirtualTextInfo', { guifg = "White" }, false);
-vim.highlight.create('DiagnosticVirtualTextHint', { guifg = "White" }, false);
+vim.api.nvim_exec("highlight! DiagnosticVirtualTextInfo guifg=White", false)
+vim.api.nvim_exec("highlight! DiagnosticVirtualTextHint guifg=White", false)
 
 -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-dark-theme-colors-to-the-menu
 -- completion colors

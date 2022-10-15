@@ -118,13 +118,13 @@ local function handle_js(client)
 end
 
 M.on_attach = function(client, bufnr)
-  setup_format()
+  -- setup_format()
   lsp_keymaps(bufnr)
   lsp_highlight_document(client)
   handle_js(client)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-M.capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+M.capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 return M
