@@ -226,11 +226,8 @@ function symlink() {
   fi
 }
 
-symlink $DOTFILES/.config/nvim $HOME/.config/nvim
 symlink $DOTFILES/.config/alacritty $HOME/.config/alacritty
 symlink $DOTFILES/.oh-my-zsh/custom $HOME/.oh-my-zsh/custom
 symlink $DOTFILES/.zshrc $HOME/.zshrc
 
-debug "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync'"
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync'
 exit 0
