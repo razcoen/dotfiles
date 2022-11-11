@@ -18,6 +18,7 @@ func main() {
 		Links: []string{
 			".zshrc",
 			".config/alacritty",
+			".config/kitty",
 			".oh-my-zsh/custom",
 		},
 	}
@@ -60,7 +61,7 @@ func (i Installer) Link() error {
 		target := filepath.Join(homedir, link)
 		i.Logger.With("link", target).Debugf("Removing link")
 		if err := os.Remove(target); err != nil {
-			return err
+      i.Logger.Debug(err)
 		}
 		source := filepath.Join(i.SourceDir, link)
 		i.Logger.With("source", source, "target", target).Infof("Creating symlink")
