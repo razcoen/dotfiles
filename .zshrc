@@ -5,7 +5,7 @@ if [ -f ${HOME}/.zplug/init.zsh ]; then
     source ${HOME}/.zplug/init.zsh
 fi
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="passion"
+ZSH_THEME="nicoulaj"
 plugins=(git)
 source $ZSH/oh-my-zsh.sh
 

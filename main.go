@@ -20,6 +20,7 @@ func main() {
 			".config/alacritty",
 			".config/kitty",
 			".oh-my-zsh/custom",
+			".oh-my-zsh/themes",
 		},
 	}
 	if err := i.Validate(); err != nil {
