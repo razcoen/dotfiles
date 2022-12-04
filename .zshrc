@@ -42,7 +42,7 @@ source ~/.cargo/env
 ##########
 # neovim #
 ##########
-export VISUAL="nvr" 
+export VISUAL="nvim" 
 
 ###########
 # kubectl #
