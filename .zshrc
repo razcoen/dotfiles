@@ -2,12 +2,9 @@
 function setup::shell() {
   source ~/shell/setup/env.sh
   source ~/shell/setup/aliases.sh
-  plugins=(git emoji emotty)
+  plugins=(git emoji emotty docker docker-compose)
   source $ZSH/oh-my-zsh.sh
   source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-}
-
-function setup::completion() {
   autoload -U +X bashcompinit && bashcompinit
   complete -o nospace -C /opt/homebrew/bin/terraform terraform
   source <(kubectl completion zsh)
@@ -26,6 +23,5 @@ function setup::local() {
 }
 
 setup::shell
-setup::completion
 setup::node
 setup::local
