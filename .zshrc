@@ -19,6 +19,13 @@ function setup::node() {
   [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 }
 
+function setup::local() {
+  if [[ -f ~/.local/share/shell/setup.sh ]]; then
+    source ~/.local/share/shell/setup.sh
+  fi
+}
+
 setup::shell
 setup::completion
 setup::node
+setup::local
