@@ -14,4 +14,4 @@ export VISUAL=nvr
 
 # Oh My Zsh 
 export ZSH=$HOME/.oh-my-zsh
-export ZSH_THEME=emotty
+export ZSH_THEME="lambda-gitster" # https://github.com/ergenekonyigit/lambda-gitster
