@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+
+set -e
+SCRIPT_NAME=$(basename ${BASH_SOURCE[0]})
+SCRIPT_DIR=$(realpath $(dirname ${BASH_SOURCE[0]}))
+
+
+############################
+# Logging
+############################
+
+# Coloring constants
+__BOLD=$(tput bold)
+__GREY=$(tput setaf 244)
+__RED=$(tput setaf 1)
+__BLUE=$(tput setaf 4)
+__YELLOW=$(tput setaf 11)
+__EC=$(tput sgr0)
+
+function usage() {
+  local exit_code=${EXIT_CODE}
+  printf "${__BOLD}Usage${__EC}
+${SCRIPT_NAME} [--force] [--verbose]
+
+${__BOLD}Description${__EC}
+  Link all the dotfiles in the home directory to this repository dotfiles.
+  By default, the original dotfiles will be backed up with '*.bak' extension.
+
+${__BOLD}Flags${__EC}
+  -f, --force         Link dotfiles forcefully, without backups.
+  -v, --verbose       Enable verbose logging.
+"
+  exit ${exit_code}
+}
+
+LOG_PREFIX=$(printf "${__GREY}dotfiles| %s|${__EC}  " "${SCRIPT_NAME}")
+ERROR_TAG="${__RED}ERROR${__EC}"
+ERROR_PREFIX="${LOG_PREFIX} ${ERROR_TAG}"
+
+function log::error() {
+  local message=$@
+  printf "%s %b\n" "${ERROR_PREFIX}" "${message}"
+}
+
+function log::info() {
+  local message=$@
+  printf "%s ${__YELLOW} INFO${__EC} %b\n" "${LOG_PREFIX}" "${message}"
+}
+
+function log::debug() {
+  local message=$@
+  local verbose=${VERBOSE}
+  if [[ ${verbose} = true ]]; then
+    printf "%s ${__BOLD}DEBUG${__EC} %b\n" "${LOG_PREFIX}" "${message}"
+  fi
+}
+
+function log::fatal() {
+  local message=$@
+  log::error ${message}
+  exit 1
+}
+
+# Add error prefix to any stderr output
+exec 2> >(trap "" INT TERM; sed "s/^/${ERROR_PREFIX} >>>>>>>> /" >&2)
+
+
+############################
+# Input and configuration
+############################
+
+FORCE=false
+VERBOSE=false
+
+# Parse flags:
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|-verbose|--verbose) VERBOSE=true; shift;;
+    -f|-force|--force) FORCE=true; shift;;
+    -h|-help|--help) usage; shift;;
+    *) log::error "Unknown option: $1"; EXIT_CODE=1 usage;;
+  esac
+done
+
+# Settings global configurations
+export VERBOSE=${VERBOSE}
+export FORCE=${FORCE}
+export LINKING_ENABLED=true
+
+function log::header_and_config() {
+  printf "
+  '########:::'#######::'########:'########:'####:'##:::::::'########::'######::
+   ##.... ##:'##.... ##:... ##..:: ##.....::. ##:: ##::::::: ##.....::'##... ##:
+   ##:::: ##: ##:::: ##:::: ##:::: ##:::::::: ##:: ##::::::: ##::::::: ##:::..::
+   ##:::: ##: ##:::: ##:::: ##:::: ######:::: ##:: ##::::::: ######:::. ######::
+   ##:::: ##: ##:::: ##:::: ##:::: ##...::::: ##:: ##::::::: ##...:::::..... ##:
+   ##:::: ##: ##:::: ##:::: ##:::: ##:::::::: ##:: ##::::::: ##:::::::'##::: ##:
+   ########::. #######::::: ##:::: ##:::::::'####: ########: ########:. ######::
+  ........::::.......::::::..:::::..::::::::....::........::........:::......:::
+
+  ${__BOLD}Setup${__EC}
+  Version: $(git --no-pager log -1 --format="%H")
+  Linking: $(if [[ ${LINKING_ENABLED} = true ]]; then echo "enabled"; else echo "disabled"; fi)
+
+"
+}
+
+############################
+# Setup
+############################
+
+log::header_and_config
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  log::fatal "Detected unsupported operating system: \"${__BOLD}$(uname)${__EC}\" (supported operating systems: MacOS)."
+fi
+
+
+function symlink() {
+  local file=$1
+  local source="${SCRIPT_DIR}/${file}"
+  local target="${HOME}/${file}"
+  local target_backup="${HOME}/${file}.bak"
+  log::debug "Link target: ${HOME}/${file}"
+  log::debug "Link source: ${SCRIPT_DIR}/${file}"
+
+  # Remove the backup file if exists.
+  if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]]; then
+    log::debug "Removing old backup: ${target_backup}"
+    rm -rf ${target_backup}
+  fi
+
+  # If the file trying to replace exist:
+  # When using "--force" delete existing file or directory being linked.
+  # Otherwise, move actual file to backup (e.g. .zshrc --> .zshrc.bak).
+  if [[ -d ${target} ]] || [[ -f ${target} ]]; then
+    if [[ ${FORCE} = true ]]; then
+      rm -r ${target} || 
+        log::fatal "Failed to remove target: ${target}."
+    else
+      log::debug "Saving backup: ${target_backup}."
+      mv ${target} ${target_backup} || 
+        log::fatal "Failed to create backup: ${target}."
+    fi
+  fi
+
+  log::debug "Creating symbolic link: ${target}"
+  ln -s ${source} ${target} ||
+    log::fatal "Failed to create symlink: ${target}."
+}
+
+
+log::info "Linking with symbolic links all the configuration files in the repository with system."
+
+for file in * .[^.]*; do
+  # Link every file in this repository excluding:
+  # 1. This script.
+  # 2. ".git" directory.
+  # 2. ".gitmodules" directory.
+  if [[ "${file}" = "${SCRIPT_NAME}" ]] \
+    || [[ "${file}" = ".git" ]] \
+    || [[ "${file}" = ".gitmodules" ]] \
+    ; then
+    continue
+  fi
+  symlink ${file}
+done
+
+log::info "Completed linking successfully."
