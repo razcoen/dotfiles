@@ -35,7 +35,7 @@ ${__BOLD}Flags${__EC}
 
 LOG_PREFIX=$(printf "${__GREY}dotfiles| %s|${__EC}  " "${SCRIPT_NAME}")
 ERROR_TAG="${__RED}ERROR${__EC}"
-ERROR_PREFIX="${LOG_PREFIX} ${ERROR_TAG}"
+ERROR_PREFIX="${LOG_PREFIX}${ERROR_TAG} "
 
 function log::error() {
   local message=$@
@@ -44,7 +44,7 @@ function log::error() {
 
 function log::info() {
   local message=$@
-  printf "${__YELLOW}INFO${__EC}  %b\n" "${message}"
+  printf " ${__YELLOW}INFO${__EC} %b\n" "${message}"
 }
 
 function log::debug() {
