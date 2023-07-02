@@ -37,6 +37,20 @@ LOG_PREFIX=$(printf "${__GREY}dotfiles| %s|${__EC}  " "${SCRIPT_NAME}")
 ERROR_TAG="${__RED}ERROR${__EC}"
 ERROR_PREFIX="${LOG_PREFIX}${ERROR_TAG} "
 
+exec 3> >(trap "" INT TERM; sed "s/^/${LOG_PREFIX}/" >&1)
+exec 4>&1
+exec 5> >(trap "" INT TERM; sed "s/^/${ERROR_PREFIX}/" >&2)
+exec 6>&2
+
+function log::enable_prefix() {
+  exec 1>&3
+  exec 2>&5
+}
+
+function log::disable_prefix() {
+  exec 1>&4
+  exec 2>&6
+}
 function log::error() {
   local message=$@
   printf "%b\n" "${message}" 1>&2
@@ -59,22 +73,6 @@ function log::fatal() {
   local message=$@
   log::error ${message}
   exit 1
-}
-
-
-exec 3> >(trap "" INT TERM; sed "s/^/${LOG_PREFIX}/" >&1)
-exec 4>&1
-exec 5> >(trap "" INT TERM; sed "s/^/${ERROR_PREFIX}/" >&2)
-exec 6>&2
-
-function log::enable_prefix() {
-  exec 1>&3
-  exec 2>&5
-}
-
-function log::disable_prefix() {
-  exec 1>&4
-  exec 2>&6
 }
 
 ############################
@@ -206,6 +204,8 @@ HOMEBREW_PACKAGES=(
   tmux 
   openssl
   zsh-autosuggestions
+  ngrok/ngrok/ngrok
+  cloudflare/cloudflare/cloudflared
 
   # Git
   git
@@ -214,6 +214,11 @@ HOMEBREW_PACKAGES=(
   # Kubernetes
   kubectl 
   kubectx
+  helm
+  tilt
+  docker-credential-helper-ecr
+  txn2/tap/kubefwd
+  entr
 
   # Database
   libpq # Postgres
