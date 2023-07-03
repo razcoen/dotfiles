@@ -34,12 +34,12 @@ ${__BOLD}Flags${__EC}
 }
 
 LOG_PREFIX=$(printf "${__GREY}dotfiles| %s|${__EC}  " "${SCRIPT_NAME}")
-ERROR_TAG="${__RED}ERROR${__EC}"
-ERROR_PREFIX="${LOG_PREFIX}${ERROR_TAG} "
+STDOUT_PREFIX="${LOG_PREFIX}(stdout) "
+STDERR_PREFIX="${LOG_PREFIX}(stderr) "
 
-exec 3> >(trap "" INT TERM; sed "s/^/${LOG_PREFIX}/" >&1)
+exec 3> >(trap "" INT TERM; sed "s/^/${STDOUT_PREFIX}/" >&1)
 exec 4>&1
-exec 5> >(trap "" INT TERM; sed "s/^/${ERROR_PREFIX}/" >&2)
+exec 5> >(trap "" INT TERM; sed "s/^/${STDERR_PREFIX}/" >&2)
 exec 6>&2
 
 function log::enable_prefix() {
@@ -51,21 +51,22 @@ function log::disable_prefix() {
   exec 1>&4
   exec 2>&6
 }
+
 function log::error() {
   local message=$@
-  printf "%b\n" "${message}" 1>&2
+  printf "${LOG_PREFIX}${__RED}ERROR${__EC} %b\n" "${message}" 1>&6
 }
 
 function log::info() {
   local message=$@
-  printf " ${__YELLOW}INFO${__EC} %b\n" "${message}"
+  printf "${LOG_PREFIX} ${__YELLOW}INFO${__EC} %b\n" "${message}" 1>&4
 }
 
 function log::debug() {
   local message=$@
   local verbose=${VERBOSE}
   if [[ ${verbose} = true ]]; then
-    printf "${__BOLD}DEBUG${__EC} %b\n" "${message}"
+    printf "${LOG_PREFIX}${__BOLD}DEBUG${__EC} %b\n" "${message}" 1>&4
   fi
 }
 
@@ -133,11 +134,12 @@ function symlink() {
   local source="${SCRIPT_DIR}/${file}"
   local target="${HOME}/${file}"
   local target_backup="${HOME}/${file}.bak"
-  log::debug "Link target: ${HOME}/${file}"
-  log::debug "Link source: ${SCRIPT_DIR}/${file}"
+  log::info "Link target: ${HOME}/${file}"
+  log::info "Link source: ${SCRIPT_DIR}/${file}"
   # Remove the backup file if exists.
   if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]]; then
     log::debug "Removing old backup: ${target_backup}"
+    log::debug rm -rf ${target_backup}
     rm -rf ${target_backup}
   fi
 
@@ -146,18 +148,22 @@ function symlink() {
   # Otherwise, move actual file to backup (e.g. .zshrc --> .zshrc.bak).
   if [[ -d ${target} ]] || [[ -f ${target} ]]; then
     if [[ ${FORCE} = true ]]; then
+      log::debug rm -r ${target}
       rm -r ${target} || 
         log::fatal "Failed to remove target: ${target}."
     else
       log::debug "Saving backup: ${target_backup}."
+      log::debug mv ${target} ${target_backup}
       mv ${target} ${target_backup} || 
         log::fatal "Failed to create backup: ${target}."
     fi
   fi
 
   log::debug "Creating symbolic link: ${target}"
+  log::debug ln -s ${source} ${target}
   ln -s ${source} ${target} ||
     log::fatal "Failed to create symlink: ${target}."
+  log::info "Created symbolic link successfully: ${target}"
 }
 
 
@@ -187,6 +193,7 @@ command -v brew &> /dev/null ||
   log::info "Installed successfully.")
 
 log::info "Updating homebrew."
+log::debug brew update
 brew update
 
 HOMEBREW_PACKAGES=(
@@ -225,9 +232,11 @@ HOMEBREW_PACKAGES=(
 )
 
 log::info "Installing homebrew packages: ${HOMEBREW_PACKAGES[@]}."
+log::debug brew install -q ${HOMEBREW_PACKAGES[@]}
 brew install -q ${HOMEBREW_PACKAGES[@]}
 log::info "Installed successfully."
 
 log::info "Upgrading homebrew packages."
+log::debug brew upgrade
 brew upgrade
 log::info "Upgraded successfully."
