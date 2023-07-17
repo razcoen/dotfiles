@@ -10,7 +10,7 @@ export PATH=$PATH:$GOBIN
 
 # Git editor (neovim)
 # About neovim remote: https://github.com/mhinz/neovim-remote
-export VISUAL=nvr
+export VISUAL=nvim
 
 # Oh My Zsh 
 export ZSH=$HOME/.oh-my-zsh
