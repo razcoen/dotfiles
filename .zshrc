@@ -1,7 +1,7 @@
 
 function setup::shell() {
-  source ~/shell/setup/env.sh
-  source ~/shell/setup/aliases.sh
+  source ~/.config/zsh/env.sh
+  source ~/.config/zsh/aliases.sh
   plugins=(git emoji emotty docker docker-compose)
   source $ZSH/oh-my-zsh.sh
   source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
