@@ -134,10 +134,10 @@ function symlink() {
   local source="${SCRIPT_DIR}/${file}"
   local target="${HOME}/${file}"
   local target_backup="${HOME}/${file}.bak"
-  log::info "Link target: ${HOME}/${file}"
   log::info "Link source: ${SCRIPT_DIR}/${file}"
+  log::info "Link target: ${HOME}/${file}"
   # Remove the backup file if exists.
-  if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]]; then
+  if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]] || [[ -L ${target} ]]; then
     log::debug "Removing old backup: ${target_backup}"
     log::debug rm -rf ${target_backup}
     rm -rf ${target_backup}
@@ -146,7 +146,8 @@ function symlink() {
   # If the file trying to replace exist:
   # When using "--force" delete existing file or directory being linked.
   # Otherwise, move actual file to backup (e.g. .zshrc --> .zshrc.bak).
-  if [[ -d ${target} ]] || [[ -f ${target} ]]; then
+  if [[ -d ${target} ]] || [[ -f ${target} ]] || [[ -L ${target} ]]; then
+      log::info exists
     if [[ ${FORCE} = true ]]; then
       log::debug rm -r ${target}
       rm -r ${target} || 
@@ -174,6 +175,7 @@ for file in * .[^.]*; do
   # 2. ".git" directory.
   # 2. ".gitmodules" directory.
   if [[ "${file}" = "${SCRIPT_NAME}" ]] || 
+    [[ "${file}" = "setup" ]] || # script name is not enough in case of symlinking this script
     [[ "${file}" = ".git" ]] || 
     [[ "${file}" = ".gitmodules" ]]; then
     continue
