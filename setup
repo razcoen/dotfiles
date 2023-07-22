@@ -215,6 +215,7 @@ HOMEBREW_PACKAGES=(
   zsh-autosuggestions
   ngrok/ngrok/ngrok
   cloudflare/cloudflare/cloudflared
+  gnu-getopt
 
   # Git
   git

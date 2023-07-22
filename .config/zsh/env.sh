@@ -15,3 +15,6 @@ export VISUAL=nvim
 # Oh My Zsh 
 export ZSH=$HOME/.oh-my-zsh
 export ZSH_THEME="lambda-gitster" # https://github.com/ergenekonyigit/lambda-gitster
+
+# getopt
+export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"
