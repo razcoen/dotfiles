@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
+# Links all the dotfiles in the home directory to this repository dotfiles.
+# By default, the original dotfiles will be backed up with '*.bak' extension.
+# Installs homebrew and all managed packages.
 
 set -e
-SCRIPT_NAME=$(basename ${BASH_SOURCE[0]})
-SCRIPT_DIR=$(realpath $(dirname ${BASH_SOURCE[0]}))
-
+SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 
 ############################
 # Logging
@@ -18,19 +20,26 @@ __YELLOW=$(tput setaf 11)
 __EC=$(tput sgr0)
 
 function usage() {
-  local exit_code=${EXIT_CODE}
-  printf "${__BOLD}Usage${__EC}
-${SCRIPT_NAME} [--force] [--verbose]
+  local exit_code=$1
+  cat << EOF
+${__BOLD}Usage${__EC}
+
+  ${SCRIPT_NAME} [--force] [--verbose]
 
 ${__BOLD}Description${__EC}
-  Link all the dotfiles in the home directory to this repository dotfiles.
+
+  Links all the dotfiles in the home directory to this repository dotfiles.
   By default, the original dotfiles will be backed up with '*.bak' extension.
+  Installs homebrew and all managed packages.
 
 ${__BOLD}Flags${__EC}
-  -f, --force         Link dotfiles forcefully, without backups.
-  -v, --verbose       Enable verbose logging.
-"
-  exit ${exit_code}
+
+  -h, --help          print usage
+  -f, --force         link dotfiles forcefully, without backups
+  -v, --verbose       enable verbose logging
+
+EOF
+  exit "${exit_code}"
 }
 
 LOG_PREFIX=$(printf "${__GREY}dotfiles| %s|${__EC}  " "${SCRIPT_NAME}")
@@ -53,17 +62,17 @@ function log::disable_prefix() {
 }
 
 function log::error() {
-  local message=$@
+  local message=$*
   printf "${LOG_PREFIX}${__RED}ERROR${__EC} %b\n" "${message}" 1>&6
 }
 
 function log::info() {
-  local message=$@
+  local message=$*
   printf "${LOG_PREFIX} ${__YELLOW}INFO${__EC} %b\n" "${message}" 1>&4
 }
 
 function log::debug() {
-  local message=$@
+  local message=$*
   local verbose=${VERBOSE}
   if [[ ${verbose} = true ]]; then
     printf "${LOG_PREFIX}${__BOLD}DEBUG${__EC} %b\n" "${message}" 1>&4
@@ -71,8 +80,8 @@ function log::debug() {
 }
 
 function log::fatal() {
-  local message=$@
-  log::error ${message}
+  local message=$*
+  log::error "${message}"
   exit 1
 }
 
@@ -84,12 +93,13 @@ FORCE=false
 VERBOSE=false
 
 # Parse flags:
+# Sadly, not using getopt quite yet: because gnu getopt is only available after setup.
 while [[ $# -gt 0 ]]; do
   case $1 in
     -v|-verbose|--verbose) VERBOSE=true; shift;;
     -f|-force|--force) FORCE=true; shift;;
-    -h|-help|--help) usage; shift;;
-    *) log::error "Unknown option: $1"; EXIT_CODE=1 usage;;
+    -h|-help|--help) usage 0;;
+    *) log::error "Unknown option: $1"; usage 1;;
   esac
 done
 
@@ -98,7 +108,7 @@ export VERBOSE=${VERBOSE}
 export FORCE=${FORCE}
 
 function log::header_and_config() {
-  printf "
+  cat << EOF
   '########:::'#######::'########:'########:'####:'##:::::::'########::'######::
    ##.... ##:'##.... ##:... ##..:: ##.....::. ##:: ##::::::: ##.....::'##... ##:
    ##:::: ##: ##:::: ##:::: ##:::: ##:::::::: ##:: ##::::::: ##::::::: ##:::..::
@@ -111,7 +121,7 @@ function log::header_and_config() {
   ${__BOLD}Setup${__EC}
   Version: $(git --no-pager log -1 --format="%H")
 
-"
+EOF
 }
 
 ############################
@@ -139,8 +149,8 @@ function symlink() {
   # Remove the backup file if exists.
   if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]] || [[ -L ${target} ]]; then
     log::debug "Removing old backup: ${target_backup}"
-    log::debug rm -rf ${target_backup}
-    rm -rf ${target_backup}
+    log::debug rm -rf "${target_backup}"
+    rm -rf "${target_backup}"
   fi
 
   # If the file trying to replace exist:
@@ -149,20 +159,20 @@ function symlink() {
   if [[ -d ${target} ]] || [[ -f ${target} ]] || [[ -L ${target} ]]; then
       log::info exists
     if [[ ${FORCE} = true ]]; then
-      log::debug rm -r ${target}
-      rm -r ${target} || 
+      log::debug rm -r "${target}"
+      rm -r "${target}" || 
         log::fatal "Failed to remove target: ${target}."
     else
       log::debug "Saving backup: ${target_backup}."
-      log::debug mv ${target} ${target_backup}
-      mv ${target} ${target_backup} || 
+      log::debug mv "${target}" "${target_backup}"
+      mv "${target}" "${target_backup}" || 
         log::fatal "Failed to create backup: ${target}."
     fi
   fi
 
   log::debug "Creating symbolic link: ${target}"
-  log::debug ln -s ${source} ${target}
-  ln -s ${source} ${target} ||
+  log::debug ln -s "${source}" "${target}"
+  ln -s "${source}" "${target}" ||
     log::fatal "Failed to create symlink: ${target}."
   log::info "Created symbolic link successfully: ${target}"
 }
@@ -180,7 +190,7 @@ for file in * .[^.]*; do
     [[ "${file}" = ".gitmodules" ]]; then
     continue
   fi
-  symlink ${file}
+  symlink "${file}"
 done
 
 log::info "Completed linking successfully."
@@ -220,6 +230,7 @@ HOMEBREW_PACKAGES=(
   # Git
   git
   gh
+  git-delta
 
   # Kubernetes
   kubectl 
@@ -234,9 +245,9 @@ HOMEBREW_PACKAGES=(
   libpq # Postgres
 )
 
-log::info "Installing homebrew packages: ${HOMEBREW_PACKAGES[@]}."
-log::debug brew install -q ${HOMEBREW_PACKAGES[@]}
-brew install -q ${HOMEBREW_PACKAGES[@]}
+log::info "Installing homebrew packages: ${HOMEBREW_PACKAGES[*]}."
+log::debug brew install -q "${HOMEBREW_PACKAGES[@]}"
+brew install -q "${HOMEBREW_PACKAGES[@]}"
 log::info "Installed successfully."
 
 log::info "Upgrading homebrew packages."
