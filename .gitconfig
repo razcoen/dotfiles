@@ -17,3 +17,5 @@
 [user]
   name = razcoen
   email = raz@icohens.com
+[push]
+	autoSetupRemote = true
