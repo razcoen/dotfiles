@@ -1,4 +1,3 @@
-
 function setup::shell() {
   source ~/.config/zsh/env.sh
   source ~/.config/zsh/aliases.sh
