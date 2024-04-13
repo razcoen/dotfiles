@@ -16,7 +16,8 @@ __BOLD=$(tput bold)
 __GREY=$(tput setaf 244)
 __RED=$(tput setaf 1)
 __BLUE=$(tput setaf 4)
-__YELLOW=$(tput setaf 11)
+__YELLOW=$(tput setaf 12)
+__ORANGE=$(tput setaf 11)
 __EC=$(tput sgr0)
 
 function usage() {
@@ -71,12 +72,21 @@ function log::info() {
   printf "${LOG_PREFIX} ${__YELLOW}INFO${__EC} %b\n" "${message}" 1>&4
 }
 
+function log::warn() {
+  local message=$*
+  printf "${LOG_PREFIX} ${__ORANGE}WARN${__EC} %b\n" "${message}" 1>&4
+}
+
 function log::debug() {
   local message=$*
   local verbose=${VERBOSE}
   if [[ ${verbose} = true ]]; then
     printf "${LOG_PREFIX}${__BOLD}DEBUG${__EC} %b\n" "${message}" 1>&4
   fi
+}
+
+function log::newline() {
+  printf "\n" 1>&4
 }
 
 function log::fatal() {
@@ -109,7 +119,8 @@ export FORCE=${FORCE}
 
 function log::header_and_config() {
   cat << EOF
-  '########:::'#######::'########:'########:'####:'##:::::::'########::'######::
+  '
+   ########:::'#######::'########:'########:'####:'##:::::::'########::'######::
    ##.... ##:'##.... ##:... ##..:: ##.....::. ##:: ##::::::: ##.....::'##... ##:
    ##:::: ##: ##:::: ##:::: ##:::: ##:::::::: ##:: ##::::::: ##::::::: ##:::..::
    ##:::: ##: ##:::: ##:::: ##:::: ######:::: ##:: ##::::::: ######:::. ######::
@@ -144,11 +155,11 @@ function symlink() {
   local source="${SCRIPT_DIR}/${file}"
   local target="${HOME}/${file}"
   local target_backup="${HOME}/${file}.bak"
+  log::newline
   log::info "Link source: ${SCRIPT_DIR}/${file}"
   log::info "Link target: ${HOME}/${file}"
   # Remove the backup file if exists.
   if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]] || [[ -L ${target} ]]; then
-    log::debug "Removing old backup: ${target_backup}"
     log::debug rm -rf "${target_backup}"
     rm -rf "${target_backup}"
   fi
@@ -157,27 +168,24 @@ function symlink() {
   # When using "--force" delete existing file or directory being linked.
   # Otherwise, move actual file to backup (e.g. .zshrc --> .zshrc.bak).
   if [[ -d ${target} ]] || [[ -f ${target} ]] || [[ -L ${target} ]]; then
-      log::info exists
+      log::info "${target} already exists"
     if [[ ${FORCE} = true ]]; then
+      log::warn "Overriding existing target: ${target}"
       log::debug rm -r "${target}"
-      rm -r "${target}" || 
-        log::fatal "Failed to remove target: ${target}."
+      rm -r "${target}" || log::fatal "Failed to remove target: ${target}."
     else
-      log::debug "Saving backup: ${target_backup}."
       log::debug mv "${target}" "${target_backup}"
-      mv "${target}" "${target_backup}" || 
-        log::fatal "Failed to create backup: ${target}."
+      mv "${target}" "${target_backup}" || log::fatal "Failed to create backup: ${target}."
     fi
   fi
 
-  log::debug "Creating symbolic link: ${target}"
   log::debug ln -s "${source}" "${target}"
-  ln -s "${source}" "${target}" ||
-    log::fatal "Failed to create symlink: ${target}."
+  ln -s "${source}" "${target}" || log::fatal "Failed to create symlink: ${target}."
   log::info "Created symbolic link successfully: ${target}"
 }
 
 
+log::newline
 log::info "Linking with symbolic links all the configuration files in the repository with system."
 for file in * .[^.]*; do
   # Link every file in this repository excluding:
@@ -200,19 +208,25 @@ log::info "Completed linking successfully."
 ############################
 
 command -v brew &> /dev/null ||
-  (log::info "Installing homebrew" &&
+  (log::newline && log::info "Installing homebrew" &&
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &&
-  log::info "Installed successfully.")
+  log::info "Installed hombrew successfully.")
 
+log::newline
 log::info "Updating homebrew."
 log::debug brew update
 brew update
+log::info "Updates homebrew successfully."
+
+HOMEBREW_TAPS=(
+  hashicorp/tap
+)
 
 HOMEBREW_PACKAGES=(
   # Programming language
   go 
   golangci-lint
-  nvm # Node.js
+  nvm # Node.js version manager
   python
 
   # Usage
@@ -223,7 +237,6 @@ HOMEBREW_PACKAGES=(
   tmux 
   openssl
   zsh-autosuggestions
-  ngrok/ngrok/ngrok
   cloudflare/cloudflare/cloudflared
   gnu-getopt
 
@@ -232,7 +245,7 @@ HOMEBREW_PACKAGES=(
   gh
   git-delta
 
-  # Kubernetes
+  # cloud
   kubectl 
   kubectx
   helm
@@ -240,17 +253,22 @@ HOMEBREW_PACKAGES=(
   docker-credential-helper-ecr
   txn2/tap/kubefwd
   entr
+  hashicorp/tap/terraform
 
   # Database
-  libpq # Postgres
+  libpq # Postgres (psql)
 )
 
+log::newline
 log::info "Installing homebrew packages: ${HOMEBREW_PACKAGES[*]}."
+log::debug brew tap -q "${HOMEBREW_TAPS[@]}"
+brew tap -q "${HOMEBREW_TAPS[@]}"
 log::debug brew install -q "${HOMEBREW_PACKAGES[@]}"
 brew install -q "${HOMEBREW_PACKAGES[@]}"
-log::info "Installed successfully."
+log::info "Installed homebrew packages successfully."
 
+log::newline
 log::info "Upgrading homebrew packages."
 log::debug brew upgrade
 brew upgrade
-log::info "Upgraded successfully."
+log::info "Upgraded homebrew packages successfully."
