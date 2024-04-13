@@ -5,14 +5,24 @@ function setup::shell() {
   source $ZSH/oh-my-zsh.sh
   source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   autoload -U +X bashcompinit && bashcompinit
-  complete -o nospace -C /opt/homebrew/bin/terraform terraform
-  source <(kubectl completion zsh)
   autoload -U compinit; compinit
 }
 
-function setup::node() {
+function setup::nodejs() {
   [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
   [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+}
+
+function setup:kubectl() {
+  if command -v kubectl &>/dev/null; then
+    source <(kubectl completion zsh)
+  fi
+}
+
+function setup:terrafrom() {
+  if command -v terraform &>/dev/null; then
+    complete -o nospace -C /opt/homebrew/bin/terraform terraform
+  fi
 }
 
 function setup::local() {
@@ -22,5 +32,7 @@ function setup::local() {
 }
 
 setup::shell
-setup::node
+setup:kubectl
+setup:terraform
+setup::nodejs
 setup::local
