@@ -5,7 +5,8 @@
 
 set -e
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
-SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
 ############################
 # Logging
@@ -119,7 +120,7 @@ export FORCE=${FORCE}
 
 function log::header_and_config() {
   cat << EOF
-  '
+
    ########:::'#######::'########:'########:'####:'##:::::::'########::'######::
    ##.... ##:'##.... ##:... ##..:: ##.....::. ##:: ##::::::: ##.....::'##... ##:
    ##:::: ##: ##:::: ##:::: ##:::: ##:::::::: ##:: ##::::::: ##::::::: ##:::..::
@@ -146,29 +147,44 @@ if [[ "$(uname)" != "Darwin" ]]; then
   log::fatal "Detected unsupported operating system: \"${__BOLD}$(uname)${__EC}\" (supported operating systems: MacOS)."
 fi
 
+SCRIPT_LINK_PATH="/usr/local/bin/dotfilessync"
+if ! [[ -L "${SCRIPT_LINK_PATH}" ]]; then 
+  log::debug ln -s "${SCRIPT_PATH}" "${SCRIPT_LINK_PATH}"
+  ln -s "${SCRIPT_PATH}" "${SCRIPT_LINK_PATH}"
+  log::info "Script is now available from ${SCRIPT_LINK_PATH}"
+fi
+
+
 ############################
 # Linking
 ############################
 
-function symlink() {
+function symlink_to_homedir() {
   local file=$1
-  local source="${SCRIPT_DIR}/${file}"
+  local source="${ROOT_DIR}/${file}"
   local target="${HOME}/${file}"
   local target_backup="${HOME}/${file}.bak"
-  log::newline
-  log::info "Link source: ${SCRIPT_DIR}/${file}"
-  log::info "Link target: ${HOME}/${file}"
+  log::debug "Link source: ${ROOT_DIR}/${file}"
+  log::debug "Link target: ${HOME}/${file}"
+
   # Remove the backup file if exists.
-  if [[ -f ${target_backup} ]] || [[ -d ${target_backup} ]] || [[ -L ${target} ]]; then
+  if [[ -h ${target_backup} ]]; then
     log::debug rm -rf "${target_backup}"
     rm -rf "${target_backup}"
   fi
+
+  # If the link already exists as expected, return.
+  if [[ -h ${target} ]] && [[ $(readlink -f ${target}) == ${source} ]]; then
+      log::debug "skipping ${target}: link already exists"
+      return
+  fi
+
 
   # If the file trying to replace exist:
   # When using "--force" delete existing file or directory being linked.
   # Otherwise, move actual file to backup (e.g. .zshrc --> .zshrc.bak).
   if [[ -d ${target} ]] || [[ -f ${target} ]] || [[ -L ${target} ]]; then
-      log::info "${target} already exists"
+      log::debug "${target} already exists"
     if [[ ${FORCE} = true ]]; then
       log::warn "Overriding existing target: ${target}"
       log::debug rm -r "${target}"
@@ -181,55 +197,56 @@ function symlink() {
 
   log::debug ln -s "${source}" "${target}"
   ln -s "${source}" "${target}" || log::fatal "Failed to create symlink: ${target}."
-  log::info "Created symbolic link successfully: ${target}"
 }
 
 
-log::newline
-log::info "Linking with symbolic links all the configuration files in the repository with system."
-for file in * .[^.]*; do
-  # Link every file in this repository excluding:
-  # 1. This script.
-  # 2. ".git" directory.
-  # 2. ".gitmodules" directory.
-  if [[ "${file}" = "${SCRIPT_NAME}" ]] || 
-    [[ "${file}" = "setup" ]] || # script name is not enough in case of symlinking this script
-    [[ "${file}" = ".git" ]] || 
-    [[ "${file}" = ".gitmodules" ]]; then
-    continue
-  fi
-  symlink "${file}"
-done
+CONFIGURATION_FILES=(
+  ".config/kitty"
+  ".config/nvim"
+  ".gitconfig"
+  ".tmux.conf"
+  ".tmux.conf.local"
+  ".zshrc"
+  ".zprofile"
+)
 
-log::info "Completed linking successfully."
+log::info "Linking with symbolic links all the configuration files to the home directory: ${CONFIGURATION_FILES[*]}."
+for file in * "${CONFIGURATION_FILES[@]}"; do
+  symlink_to_homedir "${file}"
+done
 
 ############################
 # Packages
 ############################
 
 command -v brew &> /dev/null ||
-  (log::newline && log::info "Installing homebrew" &&
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &&
-  log::info "Installed hombrew successfully.")
+  (log::info "Installing homebrew" &&
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)")
 
-log::newline
 log::info "Updating homebrew."
 log::debug brew update
 brew update
-log::info "Updates homebrew successfully."
 
 HOMEBREW_TAPS=(
   hashicorp/tap
+  messense/macos-cross-toolchains
 )
 
 HOMEBREW_PACKAGES=(
-  # Programming language
+  # programming language
   go 
   golangci-lint
-  nvm # Node.js version manager
+  nvm # node.js version manager
   python
+  openjdk
 
-  # Usage
+  # gcc cross
+  x86_64-unknown-linux-gnu
+  x86_64-unknown-linux-musl
+  aarch64-unknown-linux-gnu
+  aarch64-unknown-linux-musl
+
+  # terminal
   ripgrep 
   neovim 
   watch
@@ -240,7 +257,7 @@ HOMEBREW_PACKAGES=(
   cloudflare/cloudflare/cloudflared
   gnu-getopt
 
-  # Git
+  # git
   git
   gh
   git-delta
@@ -255,20 +272,25 @@ HOMEBREW_PACKAGES=(
   entr
   hashicorp/tap/terraform
 
-  # Database
+  # database
   libpq # Postgres (psql)
 )
 
-log::newline
 log::info "Installing homebrew packages: ${HOMEBREW_PACKAGES[*]}."
-log::debug brew tap -q "${HOMEBREW_TAPS[@]}"
-brew tap -q "${HOMEBREW_TAPS[@]}"
+
+for tap in "${HOMEBREW_TAPS[@]}"; do
+  log::debug brew tap -q "${tap}"
+  brew tap -q "${tap}"
+done
+
 log::debug brew install -q "${HOMEBREW_PACKAGES[@]}"
 brew install -q "${HOMEBREW_PACKAGES[@]}"
-log::info "Installed homebrew packages successfully."
 
-log::newline
 log::info "Upgrading homebrew packages."
 log::debug brew upgrade
 brew upgrade
-log::info "Upgraded homebrew packages successfully."
+
+# if gh auth status &> /dev/null; then
+#   log::debug gh auth login
+#   gh auth login
+# fi

@@ -1,5 +1,6 @@
 [core]
   pager = delta
+  editor = nvim
 
 [interactive]
   diffFilter = delta --color-only
@@ -8,14 +9,17 @@
   navigate = true    # use n and N to move between diff sections
   light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
 
-[merge]
-  conflictstyle = diff3
-
 [diff]
   colorMoved = default
+  tool = nvimdiff
 
-[user]
-  name = razcoen
-  email = raz@icohens.com
+[difftool "nvimdiff"]
+	cmd = nvim -d \"$LOCAL\" \"$REMOTE\"
+	path = 
+
+[mergetool "nvimdiff"]
+	cmd = nvim -d \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+
 [push]
 	autoSetupRemote = true
