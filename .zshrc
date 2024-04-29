@@ -32,6 +32,9 @@ function setup::nodejs() {
 
 function setup::java() {
   export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+  if command -v java &> /dev/null; then
+    export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | tr -d " " | cut -d "=" -f 2)"
+  fi
 }
 
 function setup::go() {
