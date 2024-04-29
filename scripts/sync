@@ -1,11 +1,20 @@
 #!/bin/bash
 # Links all the dotfiles in the home directory to this repository dotfiles.
 # By default, the original dotfiles will be backed up with '*.bak' extension.
-# Installs homebrew and all managed packages.
+# Installs all managed packages.
 
 set -e
-SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
+
+# In order to support the script symlink to /usr/local/bin:
+# Resolve the bash source to the original script path if running from a symlink.
 SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+if [[ -L ${BASH_SOURCE[0]} ]]; then
+  SCRIPT_PATH=$(readlink -f ${BASH_SOURCE[0]})
+  cd $(dirname "${SCRIPT_PATH}")
+fi
+
+SCRIPT_NAME=$(basename "${SCRIPT_PATH}")
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 ############################
@@ -240,6 +249,8 @@ HOMEBREW_PACKAGES=(
   nvm # node.js version manager
   python
   openjdk
+  maven
+  gradle
 
   # gcc cross
   x86_64-unknown-linux-gnu
