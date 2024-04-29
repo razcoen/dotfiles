@@ -291,6 +291,18 @@ log::info "Upgrading homebrew packages."
 log::debug brew upgrade
 brew upgrade
 
+GO_PACKAGES=(
+  github.com/nishanths/license/v5@latest
+)
+
+log::info "Installing go packages: ${GO_PACKAGES[*]}."
+
+for package in "${GO_PACKAGES[@]}"; do
+  log::debug go install "${package}"
+  go install "${package}"
+done
+
+
 # if gh auth status &> /dev/null; then
 #   log::debug gh auth login
 #   gh auth login
