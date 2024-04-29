@@ -204,6 +204,7 @@ CONFIGURATION_FILES=(
   ".config/kitty"
   ".config/nvim"
   ".gitconfig"
+  ".gitconfig.razcoen"
   ".tmux.conf"
   ".tmux.conf.local"
   ".zshrc"
