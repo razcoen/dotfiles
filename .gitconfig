@@ -23,3 +23,6 @@
 
 [push]
 	autoSetupRemote = true
+
+[includeIf "gitdir:~/git/github.com/razcoen/"]
+    path = ~/.gitconfig.razcoen
