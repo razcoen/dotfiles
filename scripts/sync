@@ -269,6 +269,8 @@ HOMEBREW_PACKAGES=(
   cloudflare/cloudflare/cloudflared
   gnu-getopt
   fd
+  fzf
+  bat
 
   # git
   git

@@ -17,7 +17,7 @@ function setup::baseenv() {
 function setup::shell() {
   setup::baseenv
   setup::aliases
-  plugins=(git emoji emotty docker docker-compose)
+  plugins=(git emoji emotty docker docker-compose z)
   source $ZSH/oh-my-zsh.sh
   source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   autoload -U +X bashcompinit && bashcompinit
