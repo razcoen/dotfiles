@@ -212,6 +212,7 @@ function symlink_to_homedir() {
 CONFIGURATION_FILES=(
   ".config/kitty"
   ".config/nvim"
+  ".config/fd"
   ".gitconfig"
   ".gitconfig.razcoen"
   ".tmux.conf"
