@@ -222,7 +222,7 @@ CONFIGURATION_FILES=(
 )
 
 log::info "Linking with symbolic links all the configuration files to the home directory: ${CONFIGURATION_FILES[*]}."
-for file in * "${CONFIGURATION_FILES[@]}"; do
+for file in "${CONFIGURATION_FILES[@]}"; do
   symlink_to_homedir "${file}"
 done
 
